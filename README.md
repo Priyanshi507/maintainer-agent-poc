@@ -56,13 +56,40 @@ All safety logic is built and unit-tested (`tests/test_safety.py`, 7
 tests, all passing) — the kill-switch defaults, the staleness math, and
 the fact-verification check are genuinely verified, not just described.
 
-The full pipeline (`main.py`) has been run end-to-end in dry-run mode
-against my own `ci-flake-triager` repository, confirmed via the audit
-log. It has **not** been run with `--confirm` against any repository —
-deliberately, since there was no real stale-PR situation on my own small
-repo worth actually nudging, and running it against anyone else's repo
-without being invited to would defeat the whole point of the safety
-design.
+The full pipeline has been run end-to-end against a real PR on my own
+`ci-flake-triager` repository (with the kill-switch enabled, a real
+GitHub PR, and a real Gemini API call), and one real thing was found and
+fixed in the process:
+
+**The first draft prompt produced a comment that referenced the PR by
+title instead of explicitly stating its number**, e.g. *"I noticed there
+hasn't been any activity on this pull request ('test: trivial change...')
+for 0 days"* — accurate, readable prose, but it failed the mechanical
+fact-check (`_verify_draft_facts`), which requires the PR number to
+appear explicitly, not just be implied by title context. The check
+correctly rejected it rather than posting or logging it as verified. I
+tightened the prompt to explicitly require writing `PR #{number}` or
+`#{number}`, re-ran, and got a correct result:
+
+```json
+{"timestamp": "2026-08-06T19:31:38...", "action_type": "comment_draft",
+ "pr_number": 1, "dry_run": true, "posted": false,
+ "body_preview": "Hi @Priyanshi507, just checking in on PR #1 since it
+ has been 0 days since the last update. Is this still being worked on,
+ or do you need any help with it?", "reason": "dry-run (confirm not set
+ or repo_guard mismatch)"}
+```
+
+This is the same category of finding as the anti-hallucination catch in
+`ci-flake-triager`: a plausible, well-written model output that didn't
+meet a stated, checkable requirement, caught mechanically rather than
+trusted on the strength of sounding right.
+
+The pipeline has **not** been run with `--confirm` against any real
+repository — deliberately, since posting a real comment (even on my own
+repo) wasn't necessary to prove the mechanism works, and running it
+against anyone else's repo without being invited to would defeat the
+whole point of the safety design.
 
 ## What this is NOT
 
@@ -91,3 +118,15 @@ python3 src/main.py --owner YOUR_GITHUB_USERNAME --repo YOUR_REPO
 ```bash
 python3 tests/test_safety.py
 ```
+Done
+Copy all of that above and replace the entire content of your local README.md, then:
+
+4. Commit and push the fixes:
+
+git add .
+git commit -s -m "Add .gitignore, remove pycache clutter, update README with real prompt-iteration finding"
+git push
+Run those and paste the output — once that's in, the repo will genuinely match what we've actually done, with no clutter and no stale claims.
+
+
+
