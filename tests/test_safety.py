@@ -79,6 +79,30 @@ def test_draft_with_correct_facts_passes():
     print("PASS: drafted comment with correct verifiable facts accepted")
 
 
+def test_unmapped_path_does_not_default_to_run_everything():
+    """The most important property of the scope mapper: a path with no
+    matching rule must surface as 'no_action_defined', not silently
+    fall back to running the full test suite (which would hide gaps in
+    the map) or running nothing meaningful (which would silently skip
+    real coverage)."""
+    from scope_mapper import map_changed_paths
+    results = map_changed_paths(["src/totally_unmapped_file.py"])
+    assert len(results) == 1
+    assert results[0].matched_rule is None
+    assert results[0].action == "no_action_defined"
+    assert results[0].test_targets == []
+    print("PASS: unmapped path correctly surfaces as a gap, not a silent fallback")
+
+
+def test_generated_artifact_gets_no_action_not_run_tests():
+    """A runtime/generated file (audit log) must not be treated as a
+    normal source change requiring test selection."""
+    from scope_mapper import map_changed_paths
+    results = map_changed_paths(["agent_audit_log.jsonl"])
+    assert results[0].action == "no_action_defined"
+    print("PASS: generated/runtime artifact correctly excluded from test-selection targets")
+
+
 if __name__ == "__main__":
     test_missing_config_defaults_to_disabled()
     test_explicit_disabled_blocks()
@@ -87,4 +111,6 @@ if __name__ == "__main__":
     test_filter_stale()
     test_draft_missing_pr_number_rejected()
     test_draft_with_correct_facts_passes()
+    test_unmapped_path_does_not_default_to_run_everything()
+    test_generated_artifact_gets_no_action_not_run_tests()
     print("\nAll tests passed.")

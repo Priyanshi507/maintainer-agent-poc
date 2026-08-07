@@ -118,15 +118,3 @@ python3 src/main.py --owner YOUR_GITHUB_USERNAME --repo YOUR_REPO
 ```bash
 python3 tests/test_safety.py
 ```
-Done
-Copy all of that above and replace the entire content of your local README.md, then:
-
-4. Commit and push the fixes:
-
-git add .
-git commit -s -m "Add .gitignore, remove pycache clutter, update README with real prompt-iteration finding"
-git push
-Run those and paste the output — once that's in, the repo will genuinely match what we've actually done, with no clutter and no stale claims.
-
-
-

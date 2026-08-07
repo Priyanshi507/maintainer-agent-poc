@@ -3,7 +3,7 @@
 # Must be explicitly set to enabled: true - the agent refuses to run
 # if this file is missing or this flag is false. See src/config.py.
 
-enabled: false         # flip to true to allow the agent to run at all
+enabled: false          # flip to true to allow the agent to run at all
 max_actions_per_run: 5  # hard cap regardless of how many stale PRs are found
 allowed_actions:
   - comment_draft        # only comment drafting is implemented in this prototype

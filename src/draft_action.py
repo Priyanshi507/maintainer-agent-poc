@@ -53,7 +53,6 @@ Write a short (2-3 sentence), friendly, non-accusatory comment that:
 Output only the comment text, nothing else."""
 
 
-
 def build_prompt(pr: OpenPR) -> str:
     return DRAFT_PROMPT_TEMPLATE.format(
         number=pr.number, title=pr.title, author=pr.author, days=pr.days_since_update
